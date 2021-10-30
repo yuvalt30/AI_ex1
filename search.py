@@ -16,13 +16,16 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+import heapq
 
 import util
 import searchAgents
 
+
 class Node:
     "A node is a state and the path leading to it (described as actions)."
-    def __init__(self, state, path = []):
+
+    def __init__(self, state, path=[]):
         self.state = state
         self.path = path.copy()
 
@@ -30,6 +33,22 @@ class Node:
         return (isinstance(other, self.__class__)
                 and self.state == other.state)
 
+class myPQWF(util.PriorityQueueWithFunction):
+    def update(self, item, priority):
+        def update(self, item, priority):
+            # If item already in priority queue with higher priority, update its priority and rebuild the heap.
+            # If item already in priority queue with equal or lower priority, do nothing.
+            # If item not in priority queue, do the same thing as self.push.
+            for index, (p, c, i) in enumerate(self.heap):
+                if i == item:
+                    if p <= priority:
+                        break
+                    del self.heap[index]
+                    self.heap.append((priority, c, item))
+                    heapq.heapify(self.heap)
+                    break
+            else:
+                self.push(item, priority)
 
 class SearchProblem:
     """
@@ -144,7 +163,7 @@ def breadthFirstSearch(problem: SearchProblem):
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     closed = []  # list of closed states
-    frontier = util.PriorityQueueWithFunction(lambda some_node: problem.getCostOfActions(some_node.path))
+    frontier = myPQWF(lambda some_node: problem.getCostOfActions(some_node.path))
     frontier.push(Node(problem.getStartState()))
 
     while frontier:
@@ -176,7 +195,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
     closed = []  # list of closed states
-    frontier = util.PriorityQueueWithFunction(lambda state: problem.getCostOfActions(state[1]) + heuristic(state[0],problem))
+    frontier = myPQWF(
+        lambda state: problem.getCostOfActions(state[1]) + heuristic(state[0], problem))
     frontier.push([problem.getStartState(), []])  # stack of nodes, node = <state, path>
 
     while frontier:
@@ -193,6 +213,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             if newNode[0] not in closed:
                 frontier.push(newNode)
     return None
+
 
 # Abbreviations
 bfs = breadthFirstSearch
