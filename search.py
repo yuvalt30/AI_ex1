@@ -158,7 +158,7 @@ def uniformCostSearch(problem: SearchProblem):
             new_path = node.path.copy()
             new_path.append(succ[1])
             newNode = Node(succ[0], new_path)
-            if newNode not in closed:
+            if newNode.state not in closed:
                 #  frontier.update(newNode, problem.getCostOfActions(newNode.path))
                 frontier.push(newNode)
     return None
