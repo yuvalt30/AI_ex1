@@ -29,9 +29,10 @@ class Node:
         self.state = state
         self.path = path.copy()
 
-    def __eq__(self, other):
-        return (isinstance(other, self.__class__)
-                and self.state == other.state)
+    # def __eq__(self, other):
+    #     return (isinstance(other, self.__class__)
+    #             and self.state == other.state)
+
 
 class myPQWF(util.PriorityQueueWithFunction):
     def update(self, item, priority):
@@ -48,6 +49,7 @@ class myPQWF(util.PriorityQueueWithFunction):
                 break
         else:
             self.push(item, priority)
+
 
 class SearchProblem:
     """
@@ -117,7 +119,7 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    closed = []  # list of closed states
+    closed = set()
     frontier = util.Stack()
     frontier.push(Node(problem.getStartState()))  # stack of nodes
 
@@ -126,7 +128,7 @@ def depthFirstSearch(problem: SearchProblem):
 
         if problem.isGoalState(node.state):
             return node.path
-        closed.append(node.state)
+        closed.add(node.state)
         successors = problem.getSuccessors(node.state)  # <successorState, action, cost>
         for succ in successors:
             path = node.path.copy()
@@ -139,7 +141,7 @@ def depthFirstSearch(problem: SearchProblem):
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    closed = []  # list of closed states
+    closed = set()  # set of closed states
     frontier = util.Queue()
     frontier.push(Node(problem.getStartState()))  # queue of nodes
 
@@ -148,23 +150,21 @@ def breadthFirstSearch(problem: SearchProblem):
 
         if problem.isGoalState(node.state):
             return node.path
-        closed.append(node.state)
+        closed.add(node.state)
         successors = problem.getSuccessors(node.state)  # <successorState, action, cost>
+
         for succ in successors:
-            path = node.path.copy()
-            path.append(succ[1])
-            newNode = Node(succ[0], path)
-            if newNode.state not in closed:
-                frontier.push(newNode)
-            else:
-                print("duplicated:")
-                print(newNode.state)
+            if not succ[0] in closed:
+                path = node.path.copy()
+                path.append(succ[1])
+                frontier.push(Node(succ[0], path))
+
     return None
 
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    closed = []  # list of closed states
+    closed = set()
     frontier = myPQWF(lambda some_node: problem.getCostOfActions(some_node.path))
     frontier.push(Node(problem.getStartState()))
 
@@ -173,7 +173,7 @@ def uniformCostSearch(problem: SearchProblem):
 
         if problem.isGoalState(node.state):
             return node.path
-        closed.append(node.state)
+        closed.add(node.state)
         successors = problem.getSuccessors(node.state)  # <successorState, action, cost>
         for succ in successors:
             new_path = node.path.copy()
@@ -196,7 +196,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
-    closed = []  # list of closed states
+    closed = set()
     frontier = myPQWF(
         lambda state: problem.getCostOfActions(state[1]) + heuristic(state[0], problem))
     frontier.push([problem.getStartState(), []])  # stack of nodes, node = <state, path>
@@ -206,7 +206,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
         if problem.isGoalState(node[0]):
             return node[1]
-        closed.append(node[0])
+        closed.add(node[0])
         successors = problem.getSuccessors(node[0])  # <successorState, action, cost>
         for succ in successors:
             path = node[1].copy()
