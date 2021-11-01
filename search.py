@@ -48,7 +48,7 @@ class myPQWF(util.PriorityQueueWithFunction):
                 heapq.heapify(self.heap)
                 break
         else:
-            self.push(item, priority)
+            self.push(item)
 
 
 class SearchProblem:
@@ -141,23 +141,36 @@ def depthFirstSearch(problem: SearchProblem):
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    closed = set()  # set of closed states
+    closed = []  # set of closed states
     frontier = util.Queue()
     frontier.push(Node(problem.getStartState()))  # queue of nodes
 
+    print("start: " ,problem.getStartState())
     while frontier:
         node = frontier.pop()  # node is <state, path>
 
         if problem.isGoalState(node.state):
             return node.path
-        closed.add(node.state)
+        # print("node: ",node.state)
+        closed.append(node.state)
+
         successors = problem.getSuccessors(node.state)  # <successorState, action, cost>
 
         for succ in successors:
-            if not succ[0] in closed:
-                path = node.path.copy()
-                path.append(succ[1])
-                frontier.push(Node(succ[0], path))
+            path = node.path.copy()
+            path.append(succ[1])
+            newNode = Node(succ[0], path)
+            if succ[0][0] == (4, 5):
+                print("succ: ",succ[0])
+                print("closed: ",succ[0] not in closed)
+                print("frontier: ",succ[0] not in frontier.list)
+                print()
+            if succ[0] not in closed: #  and newNode.state not in frontier.list:
+                if succ[0][0] == (4, 5):
+                    print("2222",succ[0])
+                frontier.push(newNode)
+                if succ[0][0] == (4, 5):
+                    print("22frontier22: ", succ[0] not in frontier.list)
 
     return None
 
@@ -180,7 +193,7 @@ def uniformCostSearch(problem: SearchProblem):
             new_path.append(succ[1])
             newNode = Node(succ[0], new_path)
             if newNode.state not in closed:
-                #  frontier.update(newNode, problem.getCostOfActions(newNode.path))
+                # frontier.update(newNode, problem.getCostOfActions(newNode.path))
                 frontier.push(newNode)
     return None
 
