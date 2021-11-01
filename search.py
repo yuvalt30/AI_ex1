@@ -35,7 +35,8 @@ class Node:
 
 
 class myPQWF(util.PriorityQueueWithFunction):
-    def update(self, item, priority):
+    def update(self, item):
+        priority = self.priorityFunction(item)
         # If item already in priority queue with higher priority, update its priority and rebuild the heap.
         # If item already in priority queue with equal or lower priority, do nothing.
         # If item not in priority queue, do the same thing as self.push.
@@ -178,7 +179,9 @@ def breadthFirstSearch(problem: SearchProblem):
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     closed = set()
+    # frontier = myPQWF(lambda some_node: problem.getCostOfActions(some_node.path))
     frontier = myPQWF(lambda some_node: problem.getCostOfActions(some_node.path))
+
     frontier.push(Node(problem.getStartState()))
 
     while frontier:
@@ -193,8 +196,8 @@ def uniformCostSearch(problem: SearchProblem):
             new_path.append(succ[1])
             newNode = Node(succ[0], new_path)
             if newNode.state not in closed:
-                # frontier.update(newNode, problem.getCostOfActions(newNode.path))
-                frontier.push(newNode)
+                frontier.update(newNode, problem.getCostOfActions(newNode.path))
+                # frontier.push(newNode)
     return None
 
 
@@ -211,22 +214,22 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     closed = set()
     frontier = myPQWF(
-        lambda state: problem.getCostOfActions(state[1]) + heuristic(state[0], problem))
-    frontier.push([problem.getStartState(), []])  # stack of nodes, node = <state, path>
+        lambda anode: problem.getCostOfActions(anode.path) + heuristic(anode.state, problem))
+    frontier.push(Node(problem.getStartState()))
 
     while frontier:
         node = frontier.pop()  # node is <state, path>
 
-        if problem.isGoalState(node[0]):
-            return node[1]
-        closed.add(node[0])
-        successors = problem.getSuccessors(node[0])  # <successorState, action, cost>
+        if problem.isGoalState(node.state):
+            return node.path
+        closed.add(node.state)
+        successors = problem.getSuccessors(node.state)  # <successorState, action, cost>
         for succ in successors:
-            path = node[1].copy()
+            path = node.path.copy()
             path.append(succ[1])
-            newNode = [succ[0], path]
-            if newNode[0] not in closed:
-                frontier.push(newNode)
+            newNode = Node(succ[0], path)
+            if newNode.state not in closed:
+                frontier.update(newNode)
     return None
 
 
