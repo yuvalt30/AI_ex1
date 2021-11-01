@@ -146,13 +146,14 @@ def breadthFirstSearch(problem: SearchProblem):
     frontier = util.Queue()
     frontier.push(Node(problem.getStartState()))  # queue of nodes
 
-    print("start: " ,problem.getStartState())
     while frontier:
         node = frontier.pop()  # node is <state, path>
 
         if problem.isGoalState(node.state):
             return node.path
-        # print("node: ",node.state)
+        if node.state in closed:
+            continue
+
         closed.append(node.state)
 
         successors = problem.getSuccessors(node.state)  # <successorState, action, cost>
@@ -161,17 +162,8 @@ def breadthFirstSearch(problem: SearchProblem):
             path = node.path.copy()
             path.append(succ[1])
             newNode = Node(succ[0], path)
-            if succ[0][0] == (4, 5):
-                print("succ: ",succ[0])
-                print("closed: ",succ[0] not in closed)
-                print("frontier: ",succ[0] not in frontier.list)
-                print()
-            if succ[0] not in closed: #  and newNode.state not in frontier.list:
-                if succ[0][0] == (4, 5):
-                    print("2222",succ[0])
+            if succ[0] not in closed:
                 frontier.push(newNode)
-                if succ[0][0] == (4, 5):
-                    print("22frontier22: ", succ[0] not in frontier.list)
 
     return None
 
@@ -185,6 +177,9 @@ def uniformCostSearch(problem: SearchProblem):
 
     while frontier:
         node = frontier.pop()  # node is <state, path>
+
+        if node.state in closed:
+            continue
 
         if problem.isGoalState(node.state):
             return node.path
@@ -217,6 +212,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     while frontier:
         node = frontier.pop()  # node is <state, path>
+
+        if node.state in closed:
+            continue
 
         if problem.isGoalState(node.state):
             return node.path
