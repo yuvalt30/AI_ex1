@@ -179,7 +179,6 @@ def breadthFirstSearch(problem: SearchProblem):
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     closed = set()
-    # frontier = myPQWF(lambda some_node: problem.getCostOfActions(some_node.path))
     frontier = myPQWF(lambda some_node: problem.getCostOfActions(some_node.path))
 
     frontier.push(Node(problem.getStartState()))
@@ -196,8 +195,7 @@ def uniformCostSearch(problem: SearchProblem):
             new_path.append(succ[1])
             newNode = Node(succ[0], new_path)
             if newNode.state not in closed:
-                frontier.update(newNode, problem.getCostOfActions(newNode.path))
-                # frontier.push(newNode)
+                frontier.update(newNode)
     return None
 
 
