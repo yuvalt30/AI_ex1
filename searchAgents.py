@@ -265,10 +265,10 @@ def manhattanHeuristic(position, problem, info={}):
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
 
-def euclideanHeuristic(position, problem, info={}):
+def euclideanHeuristic(position, goal, info={}):
     "The Euclidean distance heuristic for a PositionSearchProblem"
     xy1 = position
-    xy2 = problem.goal
+    xy2 = goal
     return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
 
 
@@ -377,7 +377,11 @@ def cornersHeuristic(state, problem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    euclideanDist = 0
+    for corner in state[1]:
+        euclideanDist += euclideanHeuristic(state[0],corner)
+    return euclideanDist
+
 
 
 class AStarCornersAgent(SearchAgent):
@@ -448,7 +452,7 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 
-def foodHeuristic(state, problem):
+def foodHeuristic(state, problem : FoodSearchProblem):
     """
     Your heuristic for the FoodSearchProblem goes here.
 
@@ -477,8 +481,24 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
+
+    foodList = foodGrid.asList()
+
+    distances = {}
+
+    for foodA in foodList:
+        for foodB in foodList:
+            if foodA != foodB:
+                if (foodB, foodA) in distances:
+                    continue
+                else:
+                    distances.update({(foodA,foodB) : euclideanHeuristic(foodA, foodB)});
+    if distances == {}:
+        return 0
+    furthest_foods = max(distances, key=distances.get) # 2 foods with longest distance between them
+    dist_to_closer = min(euclideanHeuristic(position,furthest_foods[0]), euclideanHeuristic(position,furthest_foods[1])) # dist to the closer food
     "*** YOUR CODE HERE ***"
-    return 0
+    return distances[furthest_foods] + dist_to_closer
 
 
 class ClosestDotSearchAgent(SearchAgent):
